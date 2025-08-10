@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Create Admin – PteroAPI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+
+    /* Background animasi gradien */
+    background: linear-gradient(270deg, #ff4f81, #6a5acd, #00c6ff, #00ff99);
+    background-size: 800% 800%;
+    animation: gradientMove 18s ease infinite;
+  }
+
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .box {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 380px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+  }
+
+  h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+  }
+
+h3 {
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: bold;
+  }
+
+
+  label {
+    display: block;
+    margin: 15px 0 5px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    transition: box-shadow 0.2s;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+  input:focus {
+    box-shadow: 0 0 6px rgba(255,255,255,0.6);
+  }
+  input::placeholder {
+    color: rgba(255,255,255,0.7);
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0072ff, #00c6ff);
+    transform: scale(1.03);
+  }
+  button:disabled {
+    background: #bbb;
+    cursor: not-allowed;
+  }
+
+  /* Spinner loading */
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.5);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .msg {
+    margin-top: 15px;
+    font-weight: bold;
+    white-space: pre-line;
+  }
+  .error { color: #ff4f4f; }
+  .success { color: #43ff65; }
+
+  .result-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    margin-top: 15px;
+    padding: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    animation: fadeIn 0.3s ease-out;
+    color: #fff;
+  }
+  .result-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #43ff65;
+  }
+  .result-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .result-card td {
+    padding: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+  .result-card td:first-child {
+    font-weight: bold;
+    width: 35%;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Copyright */
+  .footer {
+    position: absolute;
+    bottom: 10px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Create Admin Panel User</h2>
+  <h3>By Reseller Gaming</h3>
+  <label>Panel Domain
+    <input id="domain" placeholder="https://panelmu.com">
+  </label>
+  <label>Application API Key (PLTA)
+    <input id="plta" placeholder="ptla_...">
+  </label>
+  <label>Username Baru
+    <input id="user" placeholder="username admin">
+  </label>
+  <button id="createBtn" onclick="addAdmin()">Create</button>
+  <div id="msg" class="msg"></div>
+</div>
+
+<div class="footer">© Reseller Gaming Programmer</div>
+
+<audio id="successSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b2dc8f7d1.mp3?filename=success-1-6297.mp3" preload="auto"></audio>
+
+<script>
+async function addAdmin() {
+  const d = document.getElementById('domain').value.trim().replace(/\/$/, '');
+  const k = document.getElementById('plta').value.trim();
+  const u = document.getElementById('user').value.trim();
+  const btn = document.getElementById('createBtn');
+
+  if (!d || !k || !u) return showMessage('❌ Semua kolom wajib diisi', 'error');
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Loading...';
+
+  try {
+    const res = await fetch(`https://api.nvidiabotz.xyz/pterodactyl/addadmin?domain=${encodeURIComponent(d)}&plta=${encodeURIComponent(k)}&username=${encodeURIComponent(u)}`);
+    const json = await res.json();
+
+    if (json.status) {
+      const domain = json.domain || d;
+      const username = json.username || u;
+      const password = json.password || u;
+
+      document.getElementById('successSound').play();
+
+      const html = `
+        <div class="result-card">
+          <h3>✅ Admin Berhasil Dibuat</h3>
+          <table>
+            <tr><td>🌐 Domain</td><td>${domain}</td></tr>
+            <tr><td>👤 Username</td><td>${username}</td></tr>
+            <tr><td>🔑 Password</td><td>${password}</td></tr>
+          </table>
+        </div>
+      `;
+      document.getElementById('msg').innerHTML = html;
+      ['domain','plta','user'].forEach(id=>document.getElementById(id).value='');
+    } else {
+      showMessage('❌ ' + (json.error || 'Unknown error'), 'error');
+    }
+  } catch (e) {
+    showMessage('❌ ' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Create';
+}
+
+function showMessage(txt, type) {
+  const msgEl = document.getElementById('msg');
+  msgEl.className = 'msg ' + (type || '');
+  msgEl.textContent = txt;
+}
+</script>
+
+</body>
+  </html>
